@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zhuraw — Frontend Developer</title>
+
+    <!-- TAILWIND CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- KONFIGURASI TAILWIND CUSTOM -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'midnight': '#0a0a0a',
+                        'dark-card': '#121212',
+                        'blood': '#e63946',
+                        'smoke': '#a0a0a0',
+                        'snow': '#f1f1f1'
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                        'mono': ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- GOOGLE FONTS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- FAVICON -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛧</text></svg>">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { min-height: 100vh; background-color: #0a0a0a; color: #f1f1f1; font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+        ::selection { background-color: #e63946; color: #f1f1f1; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar-thumb { background: #e6394640; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #e6394680; }
+        canvas#particleCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -10; pointer-events: none; }
+        #bar1, #bar2, #bar3 { transition: all 0.3s ease; }
+        :focus-visible { outline: 2px solid #e63946; outline-offset: 2px; border-radius: 4px; }
+        a { text-decoration: none; color: inherit; transition: color 0.2s ease; }
+    </style>
+</head>
+<body class="bg-midnight text-snow font-sans overflow-x-hidden">
+
+    <!-- PARTICLE NETWORK CANVAS -->
+    <canvas id="particleCanvas" class="fixed top-0 left-0 w-full h-full -z-10"></canvas>
+
+    <!-- SIDEBAR TOGGLE -->
+    <button id="menuToggle" class="fixed top-6 left-6 z-50 w-12 h-12 flex flex-col items-center justify-center gap-1.5 bg-dark-card/80 backdrop-blur-md border border-blood/30 rounded-lg hover:border-blood transition-all duration-300 group" aria-label="Toggle Menu">
+        <span class="block w-6 h-0.5 bg-snow group-hover:bg-blood transition-all duration-300 origin-center" id="bar1"></span>
+        <span class="block w-6 h-0.5 bg-snow group-hover:bg-blood transition-all duration-300 origin-center" id="bar2"></span>
+        <span class="block w-6 h-0.5 bg-snow group-hover:bg-blood transition-all duration-300 origin-center" id="bar3"></span>
+    </button>
+
+    <!-- SIDEBAR OVERLAY -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 opacity-0 pointer-events-none transition-opacity duration-300"></div>
+
+    <!-- SIDEBAR -->
+    <nav id="sidebar" class="fixed top-0 left-0 h-full w-72 bg-dark-card/95 backdrop-blur-xl border-r border-blood/20 z-50 transform -translate-x-full transition-transform duration-300 ease-out flex flex-col py-24 px-8">
+        <ul class="space-y-2">
+            <li><a href="#home" onclick="closeSidebar()" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-blood/10 border border-blood/20 text-blood font-semibold transition-all duration-200 sidebar-link" data-section="home"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z"/></svg> Home</a></li>
+            <li><a href="#about" onclick="closeSidebar()" class="flex items-center gap-3 px-4 py-3 rounded-lg text-smoke hover:text-snow hover:bg-blood/5 border border-transparent hover:border-blood/10 transition-all duration-200 sidebar-link" data-section="about"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg> About</a></li>
+            <li><a href="#projects" onclick="closeSidebar()" class="flex items-center gap-3 px-4 py-3 rounded-lg text-smoke hover:text-snow hover:bg-blood/5 border border-transparent hover:border-blood/10 transition-all duration-200 sidebar-link" data-section="projects"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg> Projects</a></li>
+            <li><a href="#contact" onclick="closeSidebar()" class="flex items-center gap-3 px-4 py-3 rounded-lg text-smoke hover:text-snow hover:bg-blood/5 border border-transparent hover:border-blood/10 transition-all duration-200 sidebar-link" data-section="contact"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg> Contact</a></li>
+        </ul>
+        <div class="mt-auto pt-8 border-t border-blood/10">
+            <p class="text-xs text-smoke/50 font-mono">&copy; 2025 zhuraw</p>
+        </div>
+    </nav>
+
+    <!-- ==================== SECTION 1: HOME ==================== -->
+    <section id="home" class="min-h-screen flex items-center justify-center px-6 lg:px-20 pt-20 pb-12">
+        <div class="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            <!-- Teks -->
+            <div class="order-2 lg:order-1 text-center lg:text-left">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-blood/30 bg-blood/5 mb-6 animate-fade">
+                    <span class="w-2 h-2 bg-blood rounded-full animate-pulse"></span>
+                    <span class="text-xs font-mono text-blood tracking-wider uppercase">Available for work</span>
+                </div>
+                <h1 class="text-4xl sm:text-5xl lg:text-7xl font-extrabold leading-tight mb-4 animate-fade">Hai, saya <br class="hidden sm:block"><span class="text-blood relative">Zhuraw<span class="absolute -bottom-2 left-0 w-full h-1 bg-blood/40 rounded-full blur-sm"></span></span></h1>
+                <p class="text-smoke text-lg sm:text-xl max-w-md mx-auto lg:mx-0 mb-2 animate-fade">Frontend Developer</p>
+                <p class="text-smoke/60 text-sm max-w-sm mx-auto lg:mx-0 mb-8 animate-fade">Merangkai antarmuka gelap, tajam, dan penuh detail kecil yang membuat perbedaan.</p>
+                <a href="#projects" class="inline-flex items-center gap-2 px-8 py-3.5 bg-blood hover:bg-blood/90 text-snow font-semibold rounded-xl transition-all duration-300 hover:shadow-[0_0_30px_rgba(230,57,70,0.4)] hover:-translate-y-0.5 active:scale-95 animate-fade">Lihat Projek <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg></a>
+            </div>
+            <!-- Foto -->
+            <div class="order-1 lg:order-2 flex justify-center lg:justify-end animate-fade">
+                <div class="relative group">
+                    <div class="absolute inset-0 bg-blood/20 rounded-full blur-3xl scale-125 group-hover:scale-150 transition-transform duration-700"></div>
+                    <div class="relative w-56 h-56 sm:w-64 sm:h-64 lg:w-80 lg:h-80 rounded-full border-2 border-blood/40 p-2">
+                        <div class="w-full h-full rounded-full border border-blood/20 overflow-hidden bg-dark-card">
+                            <img src="https://c.termai.cc/i173/1z0n.jpg" alt="Zhuraw" class="w-full h-full object-cover rounded-full hover:scale-105 transition-transform duration-500" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22300%22><rect fill=%22%23121212%22 width=%22300%22 height=%22300%22/><text fill=%22%23e63946%22 font-size=%2220%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-family=%22monospace%22>ZHURAW</text></svg>'">
+                        </div>
+                        <span class="absolute top-4 right-8 w-3 h-3 bg-blood rounded-full shadow-[0_0_10px_#e63946] animate-pulse"></span>
+                        <span class="absolute bottom-8 left-6 w-2 h-2 bg-blood/60 rounded-full shadow-[0_0_6px_#e63946] animate-pulse" style="animation-delay: 1s;"></span>
+                    </div>
+                    <p class="text-center mt-4 text-xs text-smoke/40 font-mono tracking-widest uppercase">zhuraw</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SECTION 2: ABOUT ==================== -->
+    <section id="about" class="min-h-screen flex items-center justify-center px-6 py-20">
+        <div class="w-full max-w-4xl mx-auto">
+            <h2 class="text-3xl sm:text-5xl font-extrabold text-center mb-4 animate-fade">Tentang <span class="text-blood">Saya</span></h2>
+            <p class="text-smoke/50 text-center font-mono text-sm mb-16 animate-fade">siapa di balik layar</p>
+
+            <div class="grid md:grid-cols-2 gap-10 items-start">
+                <!-- Bio -->
+                <div class="animate-fade space-y-4">
+                    <p class="text-snow text-lg leading-relaxed">Saya <span class="text-blood font-semibold">Zhuraw</span>, frontend developer yang fokus pada detail kecil, animasi halus, dan tampilan gelap yang elegan.</p>
+                    <p class="text-smoke text-base leading-relaxed">Nama asli: <span class="text-snow">Abiee</span>. Saya membangun antarmuka web dari nol menggunakan HTML, CSS, JavaScript, dan Node.js. Setiap proyek saya anggap seperti karya seni digital — gelap, presisi, dan penuh karakter.</p>
+                    <p class="text-smoke text-sm">📍 Indonesia &bull; 💻 Tersedia untuk proyek freelance</p>
+                </div>
+
+                <!-- Skills -->
+                <div class="animate-fade">
+                    <h3 class="text-xl font-bold text-snow mb-6 flex items-center gap-2"><span class="text-blood">#</span> Tech Stack</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-3 p-3 bg-dark-card rounded-lg border border-blood/10 hover:border-blood/30 transition-all duration-300 group cursor-default">
+                            <span class="text-2xl">🐍</span>
+                            <span class="text-snow font-medium group-hover:text-blood transition-colors">Python</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 bg-dark-card rounded-lg border border-blood/10 hover:border-blood/30 transition-all duration-300 group cursor-default">
+                            <span class="text-2xl">📄</span>
+                            <span class="text-snow font-medium group-hover:text-blood transition-colors">HTML</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 bg-dark-card rounded-lg border border-blood/10 hover:border-blood/30 transition-all duration-300 group cursor-default">
+                            <span class="text-2xl">🎨</span>
+                            <span class="text-snow font-medium group-hover:text-blood transition-colors">CSS</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 bg-dark-card rounded-lg border border-blood/10 hover:border-blood/30 transition-all duration-300 group cursor-default">
+                            <span class="text-2xl">⚡</span>
+                            <span class="text-snow font-medium group-hover:text-blood transition-colors">JavaScript</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 bg-dark-card rounded-lg border border-blood/10 hover:border-blood/30 transition-all duration-300 group cursor-default">
+                            <span class="text-2xl">🟢</span>
+                            <span class="text-snow font-medium group-hover:text-blood transition-colors">Node.js</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SECTION 3: PROJECTS ==================== -->
+    <section id="projects" class="min-h-screen flex items-center justify-center px-6 py-20">
+        <div class="w-full max-w-5xl mx-auto">
+            <h2 class="text-3xl sm:text-5xl font-extrabold text-center mb-4 animate-fade">Projek <span class="text-blood">Saya</span></h2>
+            <p class="text-smoke/50 text-center font-mono text-sm mb-16 animate-fade">hasil baris kode yang hidup</p>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Kartu 1: Get Code -->
+                <div class="bg-dark-card border border-blood/10 rounded-2xl overflow-hidden hover:border-blood/40 transition-all duration-500 hover:shadow-[0_0_40px_rgba(230,57,70,0.15)] hover:-translate-y-1 group animate-fade">
+                    <div class="h-2 bg-gradient-to-r from-blood to-blood/20"></div>
+                    <div class="p-6">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 rounded-lg bg-blood/10 flex items-center justify-center text-blood font-mono font-bold text-sm">&lt;/&gt;</div>
+                            <div>
+                                <h3 class="text-snow font-bold text-lg group-hover:text-blood transition-colors">Web Get Code</h3>
+                                <p class="text-smoke/50 text-xs font-mono">v1.0 — Aktif</p>
+                            </div>
+                        </div>
+                        <p class="text-smoke text-sm mb-4 leading-relaxed">Platform untuk mendapatkan potongan kode siap pakai. Cepat, ringan, dan langsung bisa digunakan.</p>
+                        <div class="flex flex-wrap gap-2 mb-6">
+                            <span class="px-2.5 py-1 bg-blood/10 text-blood text-xs rounded-md font-mono border border-blood/20">HTML</span>
+                            <span class="px-2.5 py-1 bg-blood/10 text-blood text-xs rounded-md font-mono border border-blood/20">CSS</span>
+                            <span class="px-2.5 py-1 bg-blood/10 text-blood text-xs rounded-md font-mono border border-blood/20">JS</span>
+                        </div>
+                        <a href="https://xdev-getcode.vercel.app/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-5 py-2.5 bg-blood hover:bg-blood/90 text-snow text-sm font-semibold rounded-lg transition-all duration-300 hover:shadow-[0_0_20px_rgba(230,57,70,0.5)]">Kunjungi <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>
+                    </div>
+                </div>
+
+                <!-- Kartu 2: Create IQC -->
+                <div class="bg-dark-card border border-blood/10 rounded-2xl overflow-hidden hover:border-blood/40 transition-all duration-500 hover:shadow-[0_0_40px_rgba(230,57,70,0.15)] hover:-translate-y-1 group animate-fade">
+                    <div class="h-2 bg-gradient-to-r from-yellow-600 to-yellow-600/20"></div>
+                    <div class="p-6">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 rounded-lg bg-yellow-600/10 flex items-center justify-center text-yellow-500 font-mono font-bold text-sm">🔧</div>
+                            <div>
+                                <h3 class="text-snow font-bold text-lg group-hover:text-yellow-500 transition-colors">Create IQC</h3>
+                                <p class="text-smoke/50 text-xs font-mono">v0.8 — Maintenance</p>
+                            </div>
+                        </div>
+                        <p class="text-smoke text-sm mb-4 leading-relaxed">Web app untuk manajemen quality control. Sedang dalam tahap maintenance dan pengembangan fitur baru.</p>
+                        <div class="flex flex-wrap gap-2 mb-6">
+                            <span class="px-2.5 py-1 bg-yellow-600/10 text-yellow-500 text-xs rounded-md font-mono border border-yellow-600/20">HTML</span>
+                            <span class="px-2.5 py-1 bg-yellow-600/10 text-yellow-500 text-xs rounded-md font-mono border border-yellow-600/20">CSS</span>
+                            <span class="px-2.5 py-1 bg-yellow-600/10 text-yellow-500 text-xs rounded-md font-mono border border-yellow-600/20">Node.js</span>
+                            <span class="px-2.5 py-1 bg-red-600/10 text-red-400 text-xs rounded-md font-mono border border-red-600/20">Maint.</span>
+                        </div>
+                        <a href="https://iqc-byabiee.vercel.app/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-5 py-2.5 bg-yellow-600 hover:bg-yellow-600/90 text-snow text-sm font-semibold rounded-lg transition-all duration-300 hover:shadow-[0_0_20px_rgba(202,138,4,0.5)]">Kunjungi <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SECTION 4: CONTACT ==================== -->
+    <section id="contact" class="min-h-screen flex items-center justify-center px-6 py-20">
+        <div class="w-full max-w-2xl mx-auto text-center">
+            <h2 class="text-3xl sm:text-5xl font-extrabold mb-4 animate-fade">Hubungi <span class="text-blood">Saya</span></h2>
+            <p class="text-smoke/50 font-mono text-sm mb-16 animate-fade">jangan ragu, cukup klik</p>
+
+            <div class="grid gap-6 animate-fade">
+                <!-- WhatsApp -->
+                <div class="bg-dark-card border border-blood/10 rounded-xl p-6 hover:border-green-500/50 transition-all duration-300 group">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center text-2xl">💬</div>
+                        <div class="text-left">
+                            <h3 class="text-snow font-bold group-hover:text-green-400 transition-colors">WhatsApp</h3>
+                            <p class="text-smoke/50 text-xs font-mono">dua nomor aktif</p>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <a href="https://wa.me/6283137236898" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between px-4 py-3 bg-green-500/5 rounded-lg border border-green-500/10 hover:border-green-500/40 hover:bg-green-500/10 transition-all duration-300">
+                            <span class="text-smoke text-sm">+62 831-3723-6898</span>
+                            <span class="text-green-400 text-xs font-mono bg-green-500/10 px-2 py-1 rounded">Aktif</span>
+                        </a>
+                        <a href="https://wa.me/6285779500470" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between px-4 py-3 bg-green-500/5 rounded-lg border border-green-500/10 hover:border-green-500/40 hover:bg-green-500/10 transition-all duration-300">
+                            <span class="text-smoke text-sm">+62 857-7950-0470</span>
+                            <span class="text-yellow-500 text-xs font-mono bg-yellow-500/10 px-2 py-1 rounded">Jarang On</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Telegram -->
+                <div class="bg-dark-card border border-blood/10 rounded-xl p-6 hover:border-blue-500/50 transition-all duration-300 group">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-2xl">✈️</div>
+                        <div class="text-left">
+                            <h3 class="text-snow font-bold group-hover:text-blue-400 transition-colors">Telegram</h3>
+                            <p class="text-smoke/50 text-xs font-mono">dua akun</p>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <a href="https://t.me/Abieeee_1" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between px-4 py-3 bg-blue-500/5 rounded-lg border border-blue-500/10 hover:border-blue-500/40 hover:bg-blue-500/10 transition-all duration-300">
+                            <span class="text-smoke text-sm">@Abieeee_1</span>
+                            <span class="text-blue-400 text-xs font-mono bg-blue-500/10 px-2 py-1 rounded">Aktif</span>
+                        </a>
+                        <a href="https://t.me/ZZturu" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between px-4 py-3 bg-blue-500/5 rounded-lg border border-blue-500/10 hover:border-blue-500/40 hover:bg-blue-500/10 transition-all duration-300">
+                            <span class="text-smoke text-sm">@ZZturu</span>
+                            <span class="text-yellow-500 text-xs font-mono bg-yellow-500/10 px-2 py-1 rounded">Jarang On</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- TikTok -->
+                <a href="https://tiktok.com/@abxx202" target="_blank" rel="noopener noreferrer" class="bg-dark-card border border-blood/10 rounded-xl p-6 hover:border-pink-500/50 transition-all duration-300 group block">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-pink-500/10 flex items-center justify-center text-2xl">🎵</div>
+                        <div class="text-left flex-1">
+                            <h3 class="text-snow font-bold group-hover:text-pink-400 transition-colors">TikTok</h3>
+                            <p class="text-smoke/50 text-xs font-mono">@abxx202</p>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-smoke/30 group-hover:text-pink-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="relative py-6 text-center border-t border-blood/5 bg-midnight/80 backdrop-blur-sm">
+        <p class="text-xs text-smoke/30 font-mono">&copy; 2025 zhuraw. all rights reserved.</p>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script>
+        // ============ PARTICLE NETWORK ============
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        const particleCount = 80;
+        const connectionDistance = 140;
+        const mouseRadius = 180;
+        let mouse = { x: -9999, y: -9999 };
+
+        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        window.addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; });
+        window.addEventListener('mouseleave', () => { mouse.x = -9999; mouse.y = -9999; });
+
+        class Particle {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.6;
+                this.vy = (Math.random() - 0.5) * 0.6;
+                this.radius = Math.random() * 2.5 + 1;
+            }
+            update() {
+                this.x += this.vx; this.y += this.vy;
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+                this.x = Math.max(0, Math.min(canvas.width, this.x));
+                this.y = Math.max(0, Math.min(canvas.height, this.y));
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(230, 57, 70, 0.6)';
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = 'rgba(230, 57, 70, 0.4)';
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        for (let i = 0; i < particleCount; i++) particles.push(new Particle());
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < connectionDistance) {
+                        const opacity = 1 - dist / connectionDistance;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = `rgba(230, 57, 70, ${opacity * 0.3})`;
+                        ctx.lineWidth = 0.8;
+                        ctx.stroke();
+                    }
+                }
+                const dmx = particles[i].x - mouse.x;
+                const dmy = particles[i].y - mouse.y;
+                const mouseDist = Math.sqrt(dmx * dmx + dmy * dmy);
+                if (mouseDist < mouseRadius) {
+                    const opacity = 1 - mouseDist / mouseRadius;
+                    ctx.beginPath();
+                    ctx.moveTo(particles[i].x, particles[i].y);
+                    ctx.lineTo(mouse.x, mouse.y);
+                    ctx.strokeStyle = `rgba(230, 57, 70, ${opacity * 0.5})`;
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // ============ SIDEBAR ============
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const bar1 = document.getElementById('bar1');
+        const bar2 = document.getElementById('bar2');
+        const bar3 = document.getElementById('bar3');
+        let isOpen = false;
+
+        function openSidebar() {
+            sidebar.classList.remove('-translate-x-full');
+            overlay.classList.remove('opacity-0', 'pointer-events-none');
+            overlay.classList.add('opacity-100', 'pointer-events-auto');
+            bar1.classList.add('rotate-45', 'translate-y-[7px]');
+            bar2.classList.add('opacity-0');
+            bar3.classList.add('-rotate-45', '-translate-y-[7px]');
+            isOpen = true;
+        }
+
+        function closeSidebar() {
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('opacity-0', 'pointer-events-none');
+            overlay.classList.remove('opacity-100', 'pointer-events-auto');
+            bar1.classList.remove('rotate-45', 'translate-y-[7px]');
+            bar2.classList.remove('opacity-0');
+            bar3.classList.remove('-rotate-45', '-translate-y-[7px]');
+            isOpen = false;
+        }
+
+        menuToggle.addEventListener('click', () => { if (isOpen) closeSidebar(); else openSidebar(); });
+        overlay.addEventListener('click', closeSidebar);
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen) closeSidebar(); });
+
+        // ============ FADE-IN OBSERVER ============
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+        document.querySelectorAll('.animate-fade').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+            observer.observe(el);
+        });
+
+        // ============ SIDEBAR ACTIVE LINK BERDASARKAN SCROLL ============
+        const sections = document.querySelectorAll('section');
+        const sidebarLinks = document.querySelectorAll('.sidebar-link');
+
+        function updateActiveLink() {
+            let current = 'home';
+            sections.forEach(section => {
+                const top = section.getBoundingClientRect().top;
+                if (top <= 200) current = section.getAttribute('id');
+            });
+            sidebarLinks.forEach(link => {
+                link.classList.remove('bg-blood/10', 'border-blood/20', 'text-blood', 'font-semibold');
+                link.classList.add('text-smoke', 'border-transparent');
+                if (link.getAttribute('data-section') === current) {
+                    link.classList.add('bg-blood/10', 'border-blood/20', 'text-blood', 'font-semibold');
+                    link.classList.remove('text-smoke', 'border-transparent');
+                }
+            });
+        }
+
+        window.addEventListener('scroll', updateActiveLink);
+        updateActiveLink();
+    </script>
+
+</body>
+</html>
